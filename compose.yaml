@@ -1,0 +1,76 @@
+services:
+  mongo:
+    profiles:
+      - default
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db:/data/db
+
+  compass:
+    profiles:
+      - default
+    image: mongo-express
+    restart: always
+    ports:
+      - "28081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_URL: mongo://mongo:27017/
+    depends_on:
+      - mongo
+
+  backend:
+    profiles:
+      - default
+    build:
+      context: .
+    restart: always
+    entrypoint:
+      - "npm"
+    command:
+      - "run"
+      - "start"
+    env_file:
+      - ".env"
+    ports:
+      - "33000:3000"
+    environment:
+      DB_URL: "mongodb://mongo:27017/mestodb"
+    depends_on:
+      - mongo
+
+  nginx:
+    profiles:
+      - default
+    restart: always
+    build:
+      context: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - ".env"
+    depends_on:
+      - backend
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - certbot-www:/usr/share/nginx/html/certbot
+
+  certbot:
+    image: certbot/certbot
+    restart: "no"
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - certbot-www:/usr/share/nginx/html/certbot
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  certbot-www:
