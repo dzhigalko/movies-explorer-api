@@ -19,6 +19,6 @@ module.exports = (err, req, res, _) => {
   } else if (err instanceof ForbiddenError) {
     res.status(constants.HTTP_FORBIDDEN).send({ message: err.message });
   } else {
-    res.status(constants.HTTP_SERVER_ERROR).send({ message: 'Something went wrong' });
+    res.status(constants.HTTP_SERVER_ERROR).send({ message: constants.ServerErrorMessage });
   }
 };

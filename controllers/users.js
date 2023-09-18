@@ -38,12 +38,17 @@ const signIn = (req, res, next) => {
     .catch(next);
 };
 
+const signOut = (req, res, _) => {
+  res.clearCookie('token');
+  res.end();
+};
+
 const updateCurrentUser = (req, res, next) => {
   const { _id: userId } = req.user;
-  const { name } = req.body;
+  const { name, email, password } = req.body;
 
-  User.findByIdAndUpdate(userId, { name }, { runValidators: true, new: true })
-    .orFail(() => new NotFoundError('User not found'))
+  User.findByIdAndUpdate(userId, { name, email, password }, { runValidators: true, new: true })
+    .orFail(() => new NotFoundError())
     .then((user) => {
       res.send(user);
     })
@@ -54,7 +59,7 @@ const getCurrentUser = (req, res, next) => {
   const { _id: userId } = req.user;
 
   User.findById(userId)
-    .orFail(() => new NotFoundError('User not found'))
+    .orFail(() => new NotFoundError())
     .then((user) => {
       res.send(user);
     })
@@ -64,6 +69,7 @@ const getCurrentUser = (req, res, next) => {
 module.exports = {
   signUp,
   signIn,
+  signOut,
   updateCurrentUser,
   getCurrentUser,
 };

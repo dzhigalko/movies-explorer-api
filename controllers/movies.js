@@ -52,10 +52,10 @@ const deleteMovie = (req, res, next) => {
   const { _id: userId } = req.user;
 
   Movie.findById(movieId)
-    .orFail(() => new NotFoundError('Movie not found'))
+    .orFail(() => new NotFoundError(constants.MovieNotFoundMessage))
     .then((movie) => {
       if (movie.owner.toString() !== userId) {
-        return Promise.reject(new ForbiddenError('User doesn\'t have access to delete movie'));
+        return Promise.reject(new ForbiddenError(constants.UserUnauthorizedToDeleteMovieMessage));
       }
 
       return movie;
